@@ -1,0 +1,129 @@
+<template>
+  <label :class="wrapClasses">
+      <span :class="radioClasses">
+          <span :class="innerClasses"></span>
+          <input type="radio"
+                 :class="inputClasses"
+                 :disabled="disabled"
+                 :checked="currentValue"
+                  :name="name"
+                  @change="change">
+      </span><slot>{{ label }}</slot>
+  </label>
+</template>
+<script>
+  import { findComponentUpward, sizeValid } from '../../utils/assist';
+  import Emitter from '../../mixins/emitter';
+
+  const prefixCls = 'izy-radio';
+
+  export default {
+    name: 'Radio',
+    mixins: [Emitter],
+    props: {
+      value: {
+        type: [String, Number, Boolean],
+        default: ''
+      },
+      trueValue: {
+        type: [String, Number, Boolean],
+        default: true
+      },
+      falseValue: {
+        type: [String, Number, Boolean],
+        default: false
+      },
+      label: {
+        type: [String, Number, Boolean]
+      },
+      disabled: {
+        type: Boolean,
+        default: false
+      },
+      size: {
+        validator (value) {
+          return sizeValid(value);
+        }
+      },
+      name: {
+          type: String
+      }
+    },
+    data() {
+        return {
+          group: false,
+          currentValue: this.value,
+          parent: findComponentUpward(this, 'RadioGroup')
+        }
+    },
+    computed: {
+      wrapClasses () {
+        return [
+          `${prefixCls}-wrapper`,
+          {
+            [`${prefixCls}-group-item`]: this.group,
+            [`${prefixCls}-wrapper-checked`]: this.currentValue,
+            [`${prefixCls}-wrapper-disabled`]: this.disabled,
+            [`${prefixCls}-${this.size}`]: !!this.size
+          }
+        ];
+      },
+      radioClasses () {
+        return [
+          `${prefixCls}`,
+          {
+            [`${prefixCls}-checked`]: this.currentValue,
+            [`${prefixCls}-disabled`]: this.disabled
+          }
+        ];
+      },
+      innerClasses () {
+        return `${prefixCls}-inner`;
+      },
+      inputClasses () {
+        return `${prefixCls}-input`;
+      }
+    },
+    mounted() {
+      if (this.parent) this.group = true;
+        if(this.group) {
+            this.parent.updateValue();
+        } else {
+            this.updateValue();
+        }
+    },
+    methods: {
+        change(event) {
+          if (this.disabled) {
+            return false;
+          }
+
+          const checked = event.target.checked;
+          this.currentValue = checked;
+
+          let value = checked ? this.trueValue: this.falseValue;
+          this.$emit('input', value);
+
+          if(this.group && this.label !== undefined) {
+              this.parent.change({value: this.label});
+          }
+          if(!this.group) {
+              this.$emit('on-change', value);
+              this.dispatch('FormItem', 'on-form-change', value);
+          }
+        },
+        updateValue() {
+            this.currentValue = this.value === this.trueValue;
+        }
+    },
+
+    watch: {
+        value(val) {
+          if (val !== this.trueValue && val !== this.falseValue) {
+            throw 'Value should be trueValue or falseValue.';
+          }
+          this.updateValue();
+        }
+    }
+  }
+</script>

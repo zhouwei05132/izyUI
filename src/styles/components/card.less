@@ -1,0 +1,33 @@
+@card-prefix-cls: ~"@{css-prefix}card";
+@card-default-width: 350px;
+
+.@{card-prefix-cls}{
+  //width: @card-default-width;
+  display: inline-block;
+  background: #fff;
+  border-radius: @border-radius-small;
+  font-size: @font-size-base;
+  position: relative;
+  transition: all @transition-time @ease-in-out;
+
+  &-bordered {
+    border: 1px solid @border-color-base;
+    border-color: @border-color-split;
+  }
+
+  &-head {
+    border-bottom: 1px solid @border-color-split;
+    padding: 14px 20px;
+    line-height: 1;
+  }
+
+  &-extra {
+    position: absolute;
+    right: 16px;
+    top: 14px;
+  }
+
+  &-body {
+    padding: 20px;
+  }
+}
